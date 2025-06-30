@@ -16,6 +16,7 @@ function App() {
   const [select, setSelect] = useState<boolean>(false);
   const [updated, setUpdated] = useState<boolean>(false);
   const [adUpload, setAdUpload] = useState<boolean>(false);
+  const [csvString, setCsvString] = useState<string>("");
 
   const date = toMMDDYY(new Date());
 
@@ -40,10 +41,25 @@ function App() {
     console.log(`Folder path: ${folder}`);
   }, [audience, numRows, client, staffers, select, updated, adUpload]);
 
+  useEffect(() => {
+    console.log(csvString);
+  }, [csvString]);
+
+  const downloadCsv = () => {
+    const csvData = new Blob([csvString], { type: "text/csv" });
+    const csvUrl = URL.createObjectURL(csvData);
+    const link = document.createElement("a");
+    link.href = csvUrl;
+    link.download = folder + ".csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <img src="/logo.png" alt="Logo" className="logo" />
-      <CSVUpload setRowCount={setNumRows} />
+      <CSVUpload setRowCount={setNumRows} setCsvString={setCsvString} />
       <Dropdown onChange={setAudience} type="audiences" />
       <Dropdown onChange={setClient} type="clients" />
       <Checkbox
@@ -63,11 +79,12 @@ function App() {
         onClick={() => {
           try {
             navigator.clipboard.writeText(folder);
+            downloadCsv();
           } catch (err) {
             console.error("Failed to copy: ", err);
             alert(`Failed to copy path: ${folder}`);
           }
-          setShowModal(true);
+          setShowModal(false);
           setTimeout(() => setShowModal(false), 2000);
         }}
       >

@@ -3,9 +3,13 @@ import { useState } from "react";
 
 interface CSVUploadProps {
   setRowCount: (count: number) => void;
+  setCsvString?: (csv: string) => void;
 }
 
-export default function CSVUpload({ setRowCount }: CSVUploadProps) {
+export default function CSVUpload({
+  setRowCount,
+  setCsvString,
+}: CSVUploadProps) {
   const [file, setFile] = useState<File>();
   const reader = new FileReader();
 
@@ -25,6 +29,9 @@ export default function CSVUpload({ setRowCount }: CSVUploadProps) {
       reader.onload = function (e) {
         const csvOutput = e.target?.result;
         if (csvOutput) {
+          if (setCsvString) {
+            setCsvString(csvOutput as string);
+          }
           //horrific regex to count rows in csv, accounts for commas and new lines in quotes
           //https://stackoverflow.com/a/2953007
           var rows = (csvOutput as string).match(
