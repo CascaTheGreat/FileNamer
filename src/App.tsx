@@ -1,0 +1,81 @@
+import { useState, useEffect } from "react";
+import "./App.css";
+import Dropdown from "./components/Dropdown";
+import CopyAlert from "./components/CopyAlert";
+import CSVUpload from "./components/CSVUpload";
+import { toMMDDYY } from "./utils/dates";
+import Checkbox from "./components/Checkbox";
+
+function App() {
+  const [folder, setFolder] = useState<string>("");
+  const [audience, setAudience] = useState<string>("");
+  const [client, setClient] = useState<string>("");
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [numRows, setNumRows] = useState<number>(0);
+  const [staffers, setStaffers] = useState<boolean>(false);
+  const [select, setSelect] = useState<boolean>(false);
+  const [updated, setUpdated] = useState<boolean>(false);
+  const [adUpload, setAdUpload] = useState<boolean>(false);
+
+  const date = toMMDDYY(new Date());
+
+  useEffect(() => {
+    if (!audience || !numRows || !client) {
+      setFolder("");
+      return;
+    }
+    setFolder(
+      client +
+        "_" +
+        (adUpload ? "Direct_" : "") +
+        (select ? "Select" : "") +
+        audience +
+        (staffers ? "AndStaff" : "") +
+        (updated ? "_Updated" : "") +
+        "_" +
+        numRows +
+        "_" +
+        date
+    );
+    console.log(`Folder path: ${folder}`);
+  }, [audience, numRows, client, staffers, select, updated, adUpload]);
+
+  return (
+    <>
+      <img src="/logo.png" alt="Logo" className="logo" />
+      <CSVUpload setRowCount={setNumRows} />
+      <Dropdown onChange={setAudience} type="audiences" />
+      <Dropdown onChange={setClient} type="clients" />
+      <Checkbox
+        label="Includes Staffers?"
+        checked={staffers}
+        onChange={setStaffers}
+      />
+      <Checkbox label="Select Group?" checked={select} onChange={setSelect} />
+      <Checkbox label="Updated List?" checked={updated} onChange={setUpdated} />
+      <Checkbox
+        label="Uploading to Ad Platform?"
+        checked={adUpload}
+        onChange={setAdUpload}
+      />
+      <button
+        disabled={!audience || !numRows || !client}
+        onClick={() => {
+          try {
+            navigator.clipboard.writeText(folder);
+          } catch (err) {
+            console.error("Failed to copy: ", err);
+            alert(`Failed to copy path: ${folder}`);
+          }
+          setShowModal(true);
+          setTimeout(() => setShowModal(false), 2000);
+        }}
+      >
+        {folder == "" ? "Complete All Fields" : folder}
+      </button>
+      {showModal && <CopyAlert />}
+    </>
+  );
+}
+
+export default App;

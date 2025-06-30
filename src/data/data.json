@@ -1,0 +1,41 @@
+{
+  "category": [
+    {
+      "label": "Democrats",
+      "value": "Dems"
+    },
+    {
+      "label": "Republicans",
+      "value": "Reps"
+    },
+    {
+      "label": "Doctors",
+      "value": "Docs"
+    }
+  ],
+  "stage": [
+    {
+      "label": "Pre-Enriched",
+      "value": "Pre-Enriched"
+    },
+    {
+      "label": "Post-Enriched",
+      "value": "Post-Enriched"
+    },
+    {
+      "label": "Client Facing",
+      "value": "Client Facing"
+    },
+    {
+      "label": "LiveRamp",
+      "value": "LiveRamp"
+    }
+  ],
+  "client": [
+    { "label": "Client 1", "value": "Client 1" },
+    { "label": "Client 2", "value": "Client 2" },
+    { "label": "Client 3", "value": "Client 3" },
+    { "label": "Client 4", "value": "Client 4" },
+    { "label": "Client 5", "value": "Client 5" }
+  ]
+}
