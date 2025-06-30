@@ -1,8 +1,11 @@
 export function titleCase(str: string): string {
   return str
-    .toLowerCase()
     .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) =>
+      word === word.toUpperCase() && word.length > 1
+        ? word
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
     .join(" ");
 }
 
@@ -13,6 +16,6 @@ export function stripSpecialChars(str: string): string {
 export function formatUploadName(name: string): string {
   let formattedName = stripSpecialChars(name);
   formattedName = titleCase(formattedName);
-  formattedName = formattedName.replace(/\s+/g, "_");
+  formattedName = formattedName.replace(/\s+/g, "");
   return formattedName;
 }
