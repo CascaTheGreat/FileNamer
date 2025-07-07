@@ -5,6 +5,7 @@ import CopyAlert from "./components/CopyAlert";
 import CSVUpload from "./components/CSVUpload";
 import { toMMDDYY } from "./utils/dates";
 import Checkbox from "./components/Checkbox";
+import { updateFileName } from "./utils/supabase";
 
 function App() {
   const [folder, setFolder] = useState<string>("");
@@ -46,6 +47,11 @@ function App() {
   }, [csvString]);
 
   const downloadCsv = () => {
+    if (!csvString) {
+      alert("No CSV data to download.");
+      return;
+    }
+    updateFileName(folder + ".csv");
     const csvData = new Blob([csvString], { type: "text/csv" });
     const csvUrl = URL.createObjectURL(csvData);
     const link = document.createElement("a");
@@ -70,7 +76,7 @@ function App() {
       <Checkbox label="Select Group?" checked={select} onChange={setSelect} />
       <Checkbox label="Updated List?" checked={updated} onChange={setUpdated} />
       <Checkbox
-        label="Uploading to Ad Platform?"
+        label="Direct Upload to Ad Platform (bypassing LiveRamp)?"
         checked={adUpload}
         onChange={setAdUpload}
       />

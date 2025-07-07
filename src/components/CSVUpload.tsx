@@ -1,5 +1,6 @@
 import "../App.css";
 import { useState } from "react";
+import { uploadFile } from "../utils/supabase";
 
 interface CSVUploadProps {
   setRowCount: (count: number) => void;
@@ -47,7 +48,13 @@ export default function CSVUpload({
       };
 
       reader.readAsText(file);
-      console.log("reading file");
+      uploadFile(file, file.name)
+        .then((data) => {
+          console.log("File uploaded successfully:", data);
+        })
+        .catch((error) => {
+          console.error("Error uploading file:", error);
+        });
     }
   };
 
