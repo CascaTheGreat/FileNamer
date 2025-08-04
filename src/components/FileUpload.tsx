@@ -15,21 +15,6 @@ export default function FileUpload({
 }: CSVUploadProps) {
   const [file, setFile] = useState<File>();
 
-  const checkSize = (width: number, height: number) => {
-    const found = ad_sizes.sizes.find(
-      (size) => size.width === width && size.height === height
-    );
-    if (found) {
-      console.log(
-        `Found matching size: ${found.label} (${found.width}x${found.height})`
-      );
-      return true;
-    } else {
-      console.warn(`No matching size found for ${width}x${height}`);
-      return false;
-    }
-  };
-
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.[0]) {
       setFile(event.target.files[0]);
@@ -45,17 +30,7 @@ export default function FileUpload({
       img.src = URL.createObjectURL(file);
       img.onload = function () {
         console.log("Image loaded with size:", img.width, img.height);
-        if (checkSize(img.width, img.height)) {
-          console.log("Image size is valid.");
-          setImageSize([img.width, img.height]);
-        } else {
-          alert(
-            `Image size ${img.width}x${img.height} does not match any standard ad sizes. Please upload a valid ad creative.`
-          );
-          setImageSize([0, 0]);
-          setFileType("");
-          setImageBlob(null);
-        }
+        setImageSize([img.width, img.height]);
       };
       // get the file type
       setFileType(file.type);

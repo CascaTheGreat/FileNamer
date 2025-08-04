@@ -9,6 +9,10 @@
     { "width": 468, "height": 60, "label": "Banner" },
     { "width": 250, "height": 250, "label": "Square" },
     { "width": 200, "height": 200, "label": "Small Square" },
-    { "width": 120, "height": 600, "label": "Skyscraper" }
+    { "width": 120, "height": 600, "label": "Skyscraper" },
+    { "width": 1200, "height": 1200, "label": "Large Square" },
+    { "width": 970, "height": 90, "label": "Large Leaderboard" },
+    { "width": 300, "height": 1050, "label": "Portrait" },
+    { "width": 250, "height": 360, "label": "Triple Widescreen" }
   ]
 }
