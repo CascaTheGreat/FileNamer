@@ -7,10 +7,10 @@ import { formatUploadName } from "../utils/names";
 type OptionType = { label: string; value: string };
 const data = {
   clients: [] as OptionType[],
-  audiences: [] as OptionType[],
+  creative: [] as OptionType[],
 };
 
-type DataKey = "clients" | "audiences";
+type DataKey = "clients" | "creative";
 
 interface DropdownParams {
   onChange: (value: string) => void;
@@ -21,13 +21,44 @@ const createOption = (label: string) => ({
   label,
   value: formatUploadName(label),
 });
-
-function Dropdown({ onChange, type }: DropdownParams) {
+interface DropdownParams {
+  onChange: (value: string) => void;
+  type: DataKey;
+  client?: string;
+}
+function Dropdown({ onChange, type, client }: DropdownParams) {
   const [options, setOptions] = useState(data[type]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      if (type === "creative") {
+        //filter by client, or error if not provided
+        if (!client) {
+          setOptions([]);
+          return;
+        } else {
+          console.log("Fetching creative options for client:", client);
+          const { data: fetchedData, error } = await supabase
+            .from(type)
+            .select()
+            .eq("client", client);
+          if (error) {
+            console.error("Error fetching creative options:", error);
+            return;
+          }
+          if (fetchedData) {
+            console.log("Fetched creative options:", fetchedData);
+            const formattedOptions = fetchedData.map((item) => ({
+              label: item.label,
+              value: item.value,
+            }));
+            setOptions(formattedOptions);
+          }
+          return;
+        }
+      }
+
       const { data: fetchedData, error } = await supabase.from(type).select();
       if (error) {
         return;
@@ -41,7 +72,7 @@ function Dropdown({ onChange, type }: DropdownParams) {
       }
     };
     fetchData();
-  }, [type]);
+  }, [type, client]);
 
   const [selectedOption, setSelectedOption] = useState<{
     label: string;

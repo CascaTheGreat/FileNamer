@@ -2,90 +2,67 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import Dropdown from "./components/Dropdown";
 import CopyAlert from "./components/CopyAlert";
-import CSVUpload from "./components/CSVUpload";
-import { toMMDDYY } from "./utils/dates";
-import Checkbox from "./components/Checkbox";
+import FileUpload from "./components/FileUpload";
 import { updateFileName } from "./utils/supabase";
 
 function App() {
   const [folder, setFolder] = useState<string>("");
-  const [audience, setAudience] = useState<string>("");
   const [client, setClient] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [numRows, setNumRows] = useState<number>(0);
-  const [staffers, setStaffers] = useState<boolean>(false);
-  const [select, setSelect] = useState<boolean>(false);
-  const [updated, setUpdated] = useState<boolean>(false);
-  const [adUpload, setAdUpload] = useState<boolean>(false);
-  const [csvString, setCsvString] = useState<string>("");
-
-  const date = toMMDDYY(new Date());
+  const [fileType, setFileType] = useState<string>("");
+  const [imageSize, setImageSize] = useState<[number, number]>([0, 0]);
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [creativeName, setCreativeName] = useState<string>("");
 
   useEffect(() => {
-    if (!audience || !numRows || !client) {
+    if (
+      !imageSize ||
+      !client ||
+      !imageSize[0] ||
+      !imageSize[1] ||
+      !fileType ||
+      !creativeName
+    ) {
       setFolder("");
       return;
     }
-    setFolder(
-      client +
-        "_" +
-        (adUpload ? "Direct_" : "") +
-        (select ? "Select" : "") +
-        audience +
-        (staffers ? "AndStaff" : "") +
-        (updated ? "_Updated" : "") +
-        "_" +
-        numRows +
-        "_" +
-        date
-    );
+    setFolder(client + `_${creativeName}` + `_${imageSize[0]}x${imageSize[1]}`);
     console.log(`Folder path: ${folder}`);
-  }, [audience, numRows, client, staffers, select, updated, adUpload]);
+  }, [client, imageSize, fileType, creativeName]);
 
-  useEffect(() => {
-    console.log(csvString);
-  }, [csvString]);
-
-  const downloadCsv = () => {
-    if (!csvString) {
+  const downloadImage = () => {
+    if (!imageBlob) {
       alert("No CSV data to download.");
       return;
     }
-    updateFileName(folder + ".csv");
-    const csvData = new Blob([csvString], { type: "text/csv" });
-    const csvUrl = URL.createObjectURL(csvData);
+    updateFileName(folder + ".png");
+    const url = URL.createObjectURL(imageBlob);
     const link = document.createElement("a");
-    link.href = csvUrl;
-    link.download = folder + ".csv";
+    link.href = url;
+    link.download = folder + fileType.replace("image/", ".");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setShowModal(true);
   };
 
   return (
     <>
       <img src="/logo.png" alt="Logo" className="logo" />
-      <CSVUpload setRowCount={setNumRows} setCsvString={setCsvString} />
-      <Dropdown onChange={setAudience} type="audiences" />
+      <FileUpload
+        setImageSize={setImageSize}
+        setFileType={setFileType}
+        setImageBlob={setImageBlob}
+      />
       <Dropdown onChange={setClient} type="clients" />
-      <Checkbox
-        label="Includes Staffers?"
-        checked={staffers}
-        onChange={setStaffers}
-      />
-      <Checkbox label="Select Group?" checked={select} onChange={setSelect} />
-      <Checkbox label="Updated List?" checked={updated} onChange={setUpdated} />
-      <Checkbox
-        label="Direct Upload to Ad Platform (bypassing LiveRamp)?"
-        checked={adUpload}
-        onChange={setAdUpload}
-      />
+      <Dropdown onChange={setCreativeName} type="creative" client={client} />
       <button
-        disabled={!audience || !numRows || !client}
+        disabled={!imageSize || !fileType || !client}
         onClick={() => {
           try {
             navigator.clipboard.writeText(folder);
-            downloadCsv();
+            downloadImage();
           } catch (err) {
             console.error("Failed to copy: ", err);
             alert(`Failed to copy path: ${folder}`);

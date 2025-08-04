@@ -15,7 +15,6 @@ export function stripSpecialChars(str: string): string {
 
 export function formatUploadName(name: string): string {
   let formattedName = stripSpecialChars(name);
-  formattedName = titleCase(formattedName);
   formattedName = formattedName.replace(/\s+/g, "");
   return formattedName;
 }
