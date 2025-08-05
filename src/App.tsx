@@ -54,14 +54,14 @@ function App() {
           try {
             downloadImages();
           } catch (err) {
-            console.error("Failed to copy: ", err);
-            alert(`Failed to copy path: ${folder}`);
+            console.error("Failed to download: ", err);
+            alert(`Failed to download: ${folder}`);
           }
           setShowModal(false);
           setTimeout(() => setShowModal(false), 2000);
         }}
       >
-        {folder == "" ? "Complete All Fields" : folder}
+        {folder == "" ? "Complete All Fields" : "Download Creative"}
       </button>
       {showModal && <CopyAlert />}
     </>

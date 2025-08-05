@@ -19,7 +19,7 @@ export default function FileUpload({ setImages }: CSVUploadProps) {
     const files = event.target.files;
     if (!files) return;
     for (let i = 0; i < files.length; i++) {
-      var size, type, blob;
+      var size, type;
       var file = files[i];
       if (file) {
         var img = new Image();
@@ -30,7 +30,6 @@ export default function FileUpload({ setImages }: CSVUploadProps) {
           console.log("Image size:", size);
           type = file.type;
           console.log("File type:", type);
-          blob = file;
           console.log("File ending:", `${size}${type.replace("image/", ".")}`);
           images.push({
             name: `${size}${type.replace("image/", ".")}`,
