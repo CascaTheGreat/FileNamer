@@ -89,6 +89,14 @@ function Dropdown({ onChange, type, client }: DropdownParams) {
   const handleCreate = async (inputValue: string) => {
     setIsLoading(true);
     const newOption = createOption(inputValue);
+    if (type === "creative" && !client) {
+      alert("Please select a client before adding a creative.");
+      setIsLoading(false);
+      return;
+    }
+    if (type === "creative") {
+      (newOption as any).client = client;
+    }
     const { error } = await supabase.from(type).insert(newOption);
     if (!error) {
       setOptions((prev) => [...prev, newOption]);

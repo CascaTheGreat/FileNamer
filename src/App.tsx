@@ -3,66 +3,56 @@ import "./App.css";
 import Dropdown from "./components/Dropdown";
 import CopyAlert from "./components/CopyAlert";
 import FileUpload from "./components/FileUpload";
-import { updateFileName } from "./utils/supabase";
 
 function App() {
   const [folder, setFolder] = useState<string>("");
   const [client, setClient] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [fileType, setFileType] = useState<string>("");
-  const [imageSize, setImageSize] = useState<[number, number]>([0, 0]);
-  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [creativeName, setCreativeName] = useState<string>("");
+  const [images, setImages] = useState<{ name: string; blob: Blob | null }[]>(
+    []
+  );
 
   useEffect(() => {
-    if (
-      !imageSize ||
-      !client ||
-      !imageSize[0] ||
-      !imageSize[1] ||
-      !fileType ||
-      !creativeName
-    ) {
+    if (!images || !client || !creativeName) {
       setFolder("");
       return;
     }
-    setFolder(client + `_${creativeName}` + `_${imageSize[0]}x${imageSize[1]}`);
+    setFolder(client + `_${creativeName}_`);
     console.log(`Folder path: ${folder}`);
-  }, [client, imageSize, fileType, creativeName]);
+  }, [client, creativeName]);
 
-  const downloadImage = () => {
-    if (!imageBlob) {
-      alert("No CSV data to download.");
+  const downloadImages = () => {
+    if (!images.length) {
+      alert("No creative data to download.");
       return;
     }
-    updateFileName(folder + ".png");
-    const url = URL.createObjectURL(imageBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = folder + fileType.replace("image/", ".");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    setShowModal(true);
+    for (const image of images) {
+      if (!image.blob) continue;
+
+      const url = URL.createObjectURL(image.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = folder + image.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      setShowModal(true);
+    }
   };
 
   return (
     <>
       <img src="/logo.png" alt="Logo" className="logo" />
-      <FileUpload
-        setImageSize={setImageSize}
-        setFileType={setFileType}
-        setImageBlob={setImageBlob}
-      />
+      <FileUpload setImages={setImages} />
       <Dropdown onChange={setClient} type="clients" />
       <Dropdown onChange={setCreativeName} type="creative" client={client} />
       <button
-        disabled={!imageSize || !fileType || !client}
+        disabled={!images || !client || !creativeName}
         onClick={() => {
           try {
-            navigator.clipboard.writeText(folder);
-            downloadImage();
+            downloadImages();
           } catch (err) {
             console.error("Failed to copy: ", err);
             alert(`Failed to copy path: ${folder}`);

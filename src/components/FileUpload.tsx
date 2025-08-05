@@ -1,51 +1,56 @@
 import "../App.css";
 import { useState } from "react";
-import ad_sizes from "../assets/ad_sizes.json";
 
 interface CSVUploadProps {
-  setImageSize: (size: [number, number]) => void;
-  setFileType: (type: string) => void;
-  setImageBlob: (blob: Blob | null) => void;
+  setImages: (images: { name: string; blob: Blob | null }[]) => void;
 }
 
-export default function FileUpload({
-  setImageSize,
-  setFileType,
-  setImageBlob,
-}: CSVUploadProps) {
-  const [file, setFile] = useState<File>();
+export default function FileUpload({ setImages }: CSVUploadProps) {
+  const [numFiles, setNumFiles] = useState<number>(0);
 
-  const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files?.[0]) {
-      setFile(event.target.files[0]);
-      console.log(event.target.files[0]);
-    }
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+    setNumFiles(files.length);
   };
 
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    console.log(file);
-    if (file) {
-      var img = new Image();
-      img.src = URL.createObjectURL(file);
-      img.onload = function () {
-        console.log("Image loaded with size:", img.width, img.height);
-        setImageSize([img.width, img.height]);
-      };
-      // get the file type
-      setFileType(file.type);
-      setImageBlob(file);
+    const images: { name: string; blob: Blob | null }[] = [];
+    const files = event.target.files;
+    if (!files) return;
+    for (let i = 0; i < files.length; i++) {
+      var size, type, blob;
+      var file = files[i];
+      if (file) {
+        var img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = function () {
+          console.log("Image loaded with size:", img.width, img.height);
+          size = `${img.width}x${img.height}`;
+          console.log("Image size:", size);
+          type = file.type;
+          console.log("File type:", type);
+          blob = file;
+          console.log("File ending:", `${size}${type.replace("image/", ".")}`);
+          images.push({
+            name: `${size}${type.replace("image/", ".")}`,
+            blob: file,
+          });
+        };
+      }
+      setImages(images);
     }
   };
 
   return (
     <div className="csv-upload">
-      {file ? <h2>{file.name}</h2> : <h2>Upload Creative</h2>}
+      {numFiles ? <h2>{numFiles} files uploaded</h2> : <h2>Upload Creative</h2>}
       <input
         type="file"
         accept=".png,.jpg,.jpeg,.gif"
+        multiple={true}
         onChange={(e) => {
-          handleOnChange(e);
+          handleChange(e);
           handleUpload(e);
         }}
       />
