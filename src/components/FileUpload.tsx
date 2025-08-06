@@ -14,31 +14,28 @@ export default function FileUpload({ setImages }: CSVUploadProps) {
     setNumFiles(files.length);
   };
 
-  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const images: { name: string; blob: Blob | null }[] = [];
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
+    console.log("Files to upload:", files);
     if (!files) return;
-    for (let i = 0; i < files.length; i++) {
-      var size, type;
-      var file = files[i];
-      if (file) {
-        var img = new Image();
-        img.src = URL.createObjectURL(file);
-        img.onload = function () {
-          console.log("Image loaded with size:", img.width, img.height);
-          size = `${img.width}x${img.height}`;
-          console.log("Image size:", size);
-          type = file.type;
-          console.log("File type:", type);
-          console.log("File ending:", `${size}${type.replace("image/", ".")}`);
-          images.push({
-            name: `${size}${type.replace("image/", ".")}`,
-            blob: file,
-          });
-        };
-      }
-      setImages(images);
-    }
+
+    const imagePromises = Array.from(files).map(
+      (file) =>
+        new Promise<{ name: string; blob: Blob | null }>((resolve) => {
+          const img = new window.Image();
+          img.src = URL.createObjectURL(file);
+          img.onload = function () {
+            const size = `${img.width}x${img.height}`;
+            const type = file.type;
+            resolve({
+              name: `${size}${type.replace("image/", ".")}`,
+              blob: file,
+            });
+          };
+        })
+    );
+    const images = await Promise.all(imagePromises);
+    setImages(images);
   };
 
   return (
