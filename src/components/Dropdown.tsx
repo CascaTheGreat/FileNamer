@@ -8,9 +8,10 @@ type OptionType = { label: string; value: string };
 const data = {
   clients: [] as OptionType[],
   creative: [] as OptionType[],
+  audience: [] as OptionType[],
 };
 
-type DataKey = "clients" | "creative";
+type DataKey = "clients" | "creative" | "audience";
 
 interface DropdownParams {
   onChange: (value: string) => void;
@@ -59,6 +60,33 @@ function Dropdown({ onChange, type, client }: DropdownParams) {
         }
       }
 
+      if (type === "audience") {
+        //filter by client, or error if not provided
+        if (!client) {
+          setOptions([]);
+          return;
+        } else {
+          console.log("Fetching audience options for client:", client);
+          const { data: fetchedData, error } = await supabase
+            .from("creative_audiences")
+            .select()
+            .eq("client", client);
+          if (error) {
+            console.error("Error fetching audience options:", error);
+            return;
+          }
+          if (fetchedData) {
+            console.log("Fetched audience options:", fetchedData);
+            const formattedOptions = fetchedData.map((item) => ({
+              label: item.label,
+              value: item.value,
+            }));
+            setOptions(formattedOptions);
+          }
+          return;
+        }
+      }
+
       const { data: fetchedData, error } = await supabase.from(type).select();
       if (error) {
         return;
@@ -89,15 +117,19 @@ function Dropdown({ onChange, type, client }: DropdownParams) {
   const handleCreate = async (inputValue: string) => {
     setIsLoading(true);
     const newOption = createOption(inputValue);
-    if (type === "creative" && !client) {
+    if ((type === "creative" || type === "audience") && !client) {
       alert("Please select a client before adding a creative.");
       setIsLoading(false);
       return;
     }
+    let error;
     if (type === "creative") {
       (newOption as any).client = client;
+      error = await supabase.from(type).insert(newOption);
+    } else if (type === "audience") {
+      (newOption as any).client = client;
+      error = await supabase.from("creative_audiences").insert(newOption);
     }
-    const { error } = await supabase.from(type).insert(newOption);
     if (!error) {
       setOptions((prev) => [...prev, newOption]);
       setSelectedOption(newOption);
@@ -111,7 +143,7 @@ function Dropdown({ onChange, type, client }: DropdownParams) {
       value={selectedOption}
       onChange={handleChange}
       options={options}
-      placeholder={`Select ${type}`}
+      placeholder={`Select ${type}${type === "audience" ? " (optional)" : ""}`}
       className="dropdown"
       classNamePrefix="react-select"
       isSearchable

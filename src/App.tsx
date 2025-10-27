@@ -9,6 +9,7 @@ function App() {
   const [client, setClient] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [creativeName, setCreativeName] = useState<string>("");
+  const [audience, setAudience] = useState<string>("");
   const [images, setImages] = useState<{ name: string; blob: Blob | null }[]>(
     []
   );
@@ -18,9 +19,14 @@ function App() {
       setFolder("");
       return;
     }
+    // If we have an audience, include it in the folder name
+    if (audience) {
+      setFolder(audience + `_` + client + `_${creativeName}_`);
+      return;
+    }
+    // Otherwise, just use client and creative name
     setFolder(client + `_${creativeName}_`);
-    console.log(`Folder path: ${folder}`);
-  }, [client, creativeName]);
+  }, [client, creativeName, audience]);
 
   const downloadImages = () => {
     if (!images.length) {
@@ -48,8 +54,9 @@ function App() {
       <FileUpload setImages={setImages} />
       <Dropdown onChange={setClient} type="clients" />
       <Dropdown onChange={setCreativeName} type="creative" client={client} />
+      <Dropdown onChange={setAudience} type="audience" client={client} />
       <button
-        disabled={!images || !client || !creativeName}
+        disabled={!images && !client && !creativeName}
         onClick={() => {
           try {
             downloadImages();
