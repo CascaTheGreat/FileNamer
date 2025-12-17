@@ -6,7 +6,7 @@ export function titleCase(str: string): string {
         ? word
         : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     )
-    .join(" ");
+    .join("-");
 }
 
 export function stripSpecialChars(str: string): string {
@@ -15,6 +15,6 @@ export function stripSpecialChars(str: string): string {
 
 export function formatUploadName(name: string): string {
   let formattedName = stripSpecialChars(name);
-  formattedName = formattedName.replace(/\s+/g, "");
+  formattedName = formattedName.replace(/\s+/g, "-");
   return formattedName;
 }

@@ -129,6 +129,8 @@ function Dropdown({ onChange, type, client }: DropdownParams) {
     } else if (type === "audience") {
       (newOption as any).client = client;
       error = await supabase.from("creative_audiences").insert(newOption);
+    } else if (type === "clients") {
+      error = await supabase.from(type).insert(newOption);
     }
     if (!error) {
       setOptions((prev) => [...prev, newOption]);
